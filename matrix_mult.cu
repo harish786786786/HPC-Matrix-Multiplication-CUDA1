@@ -2,9 +2,7 @@
 
 #define N 2
 
-// -----------------------------
-// Kernel Function (GPU)
-// -----------------------------
+
 __global__ void matrixMul(int *A, int *B, int *C)
 {
     int row = threadIdx.y;
@@ -20,9 +18,7 @@ __global__ void matrixMul(int *A, int *B, int *C)
     C[row*N + col] = sum;
 }
 
-// -----------------------------
-// Host Function (CPU)
-// -----------------------------
+
 int main()
 {
     int A[N][N] = {{1,2},{3,4}};
@@ -61,4 +57,5 @@ int main()
     cudaFree(d_C);
 
     return 0;
+
 }
