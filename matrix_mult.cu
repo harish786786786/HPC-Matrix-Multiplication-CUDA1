@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include <cuda.h>
 
-#define N 2
+#define N 4
 
-
-__global__ void matrixMul(int *A, int *B, int *C)
+__global__ void matrixMulGPU(int *A,int *B,int *C)
 {
     int row = threadIdx.y;
     int col = threadIdx.x;
@@ -18,16 +18,23 @@ __global__ void matrixMul(int *A, int *B, int *C)
     C[row*N + col] = sum;
 }
 
-
 int main()
 {
-    int A[N][N] = {{1,2},{3,4}};
-    int B[N][N] = {{5,6},{7,8}};
+    int A[N][N] = { {1,2,3,4},
+                    {5,6,7,8},
+                    {9,10,11,12},
+                    {13,14,15,16} };
+
+    int B[N][N] = { {1,0,0,1},
+                    {0,1,1,0},
+                    {1,0,0,1},
+                    {0,1,1,0} };
+
     int C[N][N];
 
     int *d_A,*d_B,*d_C;
 
-    int size = N*N*sizeof(int);
+    size_t size = N*N*sizeof(int);
 
     cudaMalloc((void**)&d_A,size);
     cudaMalloc((void**)&d_B,size);
@@ -38,17 +45,18 @@ int main()
 
     dim3 threads(N,N);
 
-    matrixMul<<<1,threads>>>(d_A,d_B,d_C);
+    matrixMulGPU<<<1,threads>>>(d_A,d_B,d_C);
 
     cudaMemcpy(C,d_C,size,cudaMemcpyDeviceToHost);
 
-    printf("Matrix Multiplication Result:\n");
+    printf("Result Matrix:\n");
 
     for(int i=0;i<N;i++)
     {
         for(int j=0;j<N;j++)
-        printf("%d ",C[i][j]);
-
+        {
+            printf("%d ",C[i][j]);
+        }
         printf("\n");
     }
 
@@ -57,5 +65,4 @@ int main()
     cudaFree(d_C);
 
     return 0;
-
 }
